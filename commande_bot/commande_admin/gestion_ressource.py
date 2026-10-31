@@ -5,7 +5,8 @@ from database.player import (
     ajouter_ball,
     retirer_ball,
     ajouter_argent,
-    retirer_argent
+    retirer_argent,
+    payer_joueur
 )
 
 from utilitaire.permission import est_admin
@@ -82,8 +83,7 @@ def charger_commandes_gestion_ressource(bot):
             f"✅ **{nombre} {type_ball.value}** "
             f"ont été ajoutées à {joueur.mention}."
         )
-
-
+    
     @bot.tree.command(
         name="retirer_ball",
         description="Retirer des Pokéballs à un joueur"
@@ -152,6 +152,51 @@ def charger_commandes_gestion_ressource(bot):
         await interaction.response.send_message(
             f"✅ **{nombre} {type_ball.value}** "
             f"ont été retirées à {joueur.mention}."
+        )
+
+
+    @bot.tree.command(
+        name="payer",
+        description="Envoyer de l'argent à un autre joueur"
+    )
+    @app_commands.describe(
+        joueur="Joueur qui recevra l'argent",
+        montant="Montant à envoyer"
+    )
+    async def payer(
+        interaction: discord.Interaction,
+        joueur: discord.Member,
+        montant: int
+    ):
+
+        # Vérifie le montant
+        if montant <= 0:
+            await interaction.response.send_message(
+                "❌ Le montant doit être supérieur à 0.",
+                ephemeral=True
+            )
+            return
+
+        # Effectue le transfert
+        succes, message = payer_joueur(
+            interaction.user.id,
+            joueur.id,
+            montant
+        )
+
+        if not succes:
+            await interaction.response.send_message(
+                f"❌ {message}",
+                ephemeral=True
+            )
+            return
+
+        # Confirme le paiement
+        await interaction.response.send_message(
+            f"💸 **Transfert effectué !**\n\n"
+            f"👤 Expéditeur : {interaction.user.mention}\n"
+            f"🎁 Destinataire : {joueur.mention}\n"
+            f"💰 Montant envoyé : **{montant}** Pokédollars"
         )
 
 

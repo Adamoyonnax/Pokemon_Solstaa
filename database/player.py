@@ -182,6 +182,59 @@ def ajouter_argent(player_id, montant):
 
     return succes
 
+# Permet à un joueur d'acheter des balls
+def acheter_ball(player_id, type_ball, nombre):
+    prix_balls = {
+        "Pokéball": ("pokeball", 200),
+        "Superball": ("superball", 500),
+        "Hyperball": ("hyperball", 800)
+    }
+
+    if type_ball not in prix_balls or nombre <= 0:
+        return False, 0, 0
+
+    colonne, prix_unitaire = prix_balls[type_ball]
+    prix_total = prix_unitaire * nombre
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # Vérifie que le joueur possède assez d'argent
+    cursor.execute("""
+        UPDATE players
+        SET money = money - ?
+        WHERE discord_id = ? AND money >= ?
+    """, (prix_total, player_id, prix_total))
+
+    if cursor.rowcount == 0:
+        conn.close()
+        return False, prix_total, 0
+
+    # Ajoute les balls à l'inventaire
+    cursor.execute("""
+        INSERT OR IGNORE INTO inventories (player_id)
+        VALUES (?)
+    """, (player_id,))
+
+    cursor.execute(f"""
+        UPDATE inventories
+        SET {colonne} = {colonne} + ?
+        WHERE player_id = ?
+    """, (nombre, player_id))
+
+    # Récupère l'argent restant
+    cursor.execute("""
+        SELECT money
+        FROM players
+        WHERE discord_id = ?
+    """, (player_id,))
+
+    argent_restant = cursor.fetchone()["money"]
+
+    conn.commit()
+    conn.close()
+
+    return True, prix_total, argent_restant
 
 # Retire de l'argent au joueur
 def retirer_argent(player_id, montant):
@@ -226,3 +279,59 @@ def retirer_argent(player_id, montant):
     conn.close()
 
     return True
+
+# Permet à un joueur de payer un autre joueur
+def payer_joueur(expediteur_id, destinataire_id, montant):
+    if montant <= 0:
+        return False, "Le montant doit être supérieur à 0."
+
+    if expediteur_id == destinataire_id:
+        return False, "Tu ne peux pas te payer toi-même."
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Vérifie que les deux joueurs existent
+        cursor.execute("""
+            SELECT discord_id
+            FROM players
+            WHERE discord_id IN (?, ?)
+        """, (expediteur_id, destinataire_id))
+
+        joueurs = cursor.fetchall()
+
+        if len(joueurs) != 2:
+            return False, "Un des deux joueurs ne possède pas de profil."
+
+        # Retire l'argent de l'expéditeur
+        cursor.execute("""
+            UPDATE players
+            SET money = money - ?
+            WHERE discord_id = ?
+            AND money >= ?
+        """, (montant, expediteur_id, montant))
+
+        if cursor.rowcount == 0:
+            conn.rollback()
+            return False, "Tu ne possèdes pas assez d'argent."
+
+        # Ajoute l'argent au destinataire
+        cursor.execute("""
+            UPDATE players
+            SET money = money + ?
+            WHERE discord_id = ?
+        """, (montant, destinataire_id))
+
+        conn.commit()
+        return True, "Paiement effectué."
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        conn.close()
+
+
+

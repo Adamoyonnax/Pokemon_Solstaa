@@ -11,6 +11,7 @@ from commande_bot.spawn import charger_commandes_spawn
 from commande_bot.commande_admin.ajout_suppresion_pokemons import (charger_commandes_admin_pokemon)
 from commande_bot.commande_admin.gestion_ressource import(charger_commandes_gestion_ressource)
 from commande_bot.commande_admin.gestion_zone import (charger_commandes_zone)
+from commande_bot.gestion_recompense import (charger_commandes_recompense)
 
 # ID du Serveur
 GUILD_ID = 1436381394363351072
@@ -35,6 +36,7 @@ charger_commandes_spawn(bot)
 charger_commandes_admin_pokemon(bot)
 charger_commandes_gestion_ressource(bot)
 charger_commandes_zone(bot)
+charger_commandes_recompense(bot)
 
 # Se déclenche à la connexion du bot  
 @bot.event
