@@ -14,7 +14,7 @@ from commande_bot.commande_admin.gestion_zone import (charger_commandes_zone)
 from commande_bot.gestion_recompense import (charger_commandes_recompense)
 
 # ID du Serveur
-GUILD_ID = 1436381394363351072
+GUILD_ID = 1239518035996573759
 
 # Charge la Base de Donnée 
 init_db()

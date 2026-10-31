@@ -2,11 +2,11 @@ import discord
 from discord import app_commands
 
 from database.player import (
-    ajouter_ball,
-    retirer_ball,
-    ajouter_argent,
-    retirer_argent,
-    payer_joueur
+    ajouter_ball as db_ajouter_ball,
+    retirer_ball as db_retirer_ball,
+    ajouter_argent as db_ajouter_argent,
+    retirer_argent as db_retirer_argent,
+    payer_joueur as db_payer_joueur
 )
 
 from utilitaire.permission import est_admin
@@ -66,7 +66,7 @@ def charger_commandes_gestion_ressource(bot):
             return
 
         # Ajoute les balls au joueur
-        succes = ajouter_ball(
+        succes = db_ajouter_ball(
             joueur.id,
             type_ball.value,
             nombre
@@ -135,7 +135,7 @@ def charger_commandes_gestion_ressource(bot):
             return
 
         # Retire les balls du joueur
-        succes = retirer_ball(
+        succes = db_retirer_ball(
             joueur.id,
             type_ball.value,
             nombre
@@ -178,7 +178,7 @@ def charger_commandes_gestion_ressource(bot):
             return
 
         # Effectue le transfert
-        succes, message = payer_joueur(
+        succes, message = db_payer_joueur(
             interaction.user.id,
             joueur.id,
             montant
@@ -233,7 +233,7 @@ def charger_commandes_gestion_ressource(bot):
             return
 
         # Ajoute l'argent au joueur
-        succes = ajouter_argent(
+        succes = db_ajouter_argent(
             joueur.id,
             montant
         )
@@ -285,7 +285,7 @@ def charger_commandes_gestion_ressource(bot):
             return
 
         # Retire l'argent du joueur
-        succes = retirer_argent(
+        succes = db_retirer_argent(
             joueur.id,
             montant
         )

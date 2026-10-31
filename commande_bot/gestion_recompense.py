@@ -1,7 +1,7 @@
 
 import discord
 
-from database.recompense import effectuer_fouille
+from database.recompense import effectuer_fouille, effectuer_rencontre_dresseur
 
 
 # Charge la commande de fouille
