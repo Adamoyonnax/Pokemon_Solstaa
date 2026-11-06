@@ -4,19 +4,31 @@ import discord
 # Boutons du /pokedex 
 class PokemonListeView(discord.ui.View):
 
-    def __init__(self, pokemons, par_page=10):
+    def __init__(
+        self,
+        pokemons,
+        par_page=10,
+        nombre_pokemons=0,
+        nombre_total=1025
+    ):
+        
         super().__init__(timeout=120)
-
+    
         self.pokemons = pokemons
         self.par_page = par_page
         self.page = 0
-
+    
+        self.nombre_pokemons = nombre_pokemons
+        self.nombre_total = nombre_total
+    
         self.nombre_pages = (
             len(pokemons) + par_page - 1
         ) // par_page
-
+    
+        self.message = None
+    
         self.mettre_a_jour_boutons()
-
+    
     def creer_embed(self):
 
         debut = self.page * self.par_page
@@ -42,12 +54,12 @@ class PokemonListeView(discord.ui.View):
 
         embed = discord.Embed(
             title="🎒 Tes Pokémon",
-            description=description,
+            description=(
+                f"📖 **Pokédex : {self.nombre_pokemons}/"
+                f"{self.nombre_total} Pokémon découverts**\n\n"
+                f"{description}"
+            ),
             color=discord.Color.blue()
-        )
-
-        embed.set_footer(
-            text=f"Page {self.page + 1}/{self.nombre_pages}"
         )
 
         return embed
