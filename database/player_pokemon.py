@@ -131,3 +131,20 @@ def utiliser_pokeball(player_id, type_ball):
     conn.close()
 
     return utilisee
+    
+    
+def compter_pokemons_uniques(player_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT COUNT(DISTINCT pokemon_id)
+        FROM player_pokemons
+        WHERE player_id = ?
+    """, (player_id,))
+
+    nombre = cursor.fetchone()[0]
+
+    conn.close()
+
+    return nombre
