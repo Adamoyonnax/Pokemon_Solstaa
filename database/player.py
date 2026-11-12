@@ -333,5 +333,20 @@ def payer_joueur(expediteur_id, destinataire_id, montant):
     finally:
         conn.close()
 
+def modifier_nom_personnage(player_id, nouveau_nom):
+    conn = get_connection()
+    cursor = conn.cursor()
 
+    cursor.execute("""
+        UPDATE players
+        SET personnage = ?
+        WHERE discord_id = ?
+    """, (nouveau_nom, player_id))
+
+    modifie = cursor.rowcount > 0
+
+    conn.commit()
+    conn.close()
+
+    return modifie
 

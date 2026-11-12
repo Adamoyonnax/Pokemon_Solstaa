@@ -6,7 +6,8 @@ from database.player import (
     create_player,
     get_player,
     get_inventory,
-    acheter_ball
+    acheter_ball,
+    modifier_nom_personnage
 )
 
 from database.player_pokemon import (
@@ -206,3 +207,54 @@ def charger_commandes_player(bot):
 
         # Récupère le message pour les boutons
         view.message = await interaction.original_response()
+
+    @bot.tree.command(
+    name="modifier_nom",
+    description="Modifier le nom de ton personnage"
+)
+    @app_commands.describe(
+        nouveau_nom="Le nouveau nom de ton personnage"
+    )
+    async def modifier_nom(
+        interaction: discord.Interaction,
+        nouveau_nom: str
+    ):
+
+        # Vérifie que le joueur existe
+        joueur = get_player(interaction.user.id)
+
+        if not joueur:
+            await interaction.response.send_message(
+                "❌ Tu n'as pas encore créé de personnage.",
+                ephemeral=True
+            )
+            return
+
+        # Vérifie le nom
+        nouveau_nom = nouveau_nom.strip()
+
+        if len(nouveau_nom) < 2 or len(nouveau_nom) > 30:
+            await interaction.response.send_message(
+                "❌ Le nom doit contenir entre 2 et 30 caractères.",
+                ephemeral=True
+            )
+            return
+
+        # Modifie le nom
+        succes = modifier_nom_personnage(
+            interaction.user.id,
+            nouveau_nom
+        )
+
+        if not succes:
+            await interaction.response.send_message(
+                "❌ Impossible de modifier ton nom.",
+                ephemeral=True
+            )
+            return
+
+        await interaction.response.send_message(
+            f"✅ Ton personnage porte désormais le nom **{nouveau_nom}** !",
+            ephemeral=True
+        )
+

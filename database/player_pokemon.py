@@ -131,3 +131,24 @@ def utiliser_pokeball(player_id, type_ball):
     conn.close()
 
     return utilisee
+
+def possede_pokemon_sql(player_id, pokemon_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT EXISTS(
+            SELECT 1
+            FROM player_pokemons
+            WHERE player_id = ?
+            AND pokemon_id = ?
+        )
+    """, (player_id, pokemon_id))
+
+    resultat = cursor.fetchone()[0]
+
+    conn.close()
+
+    return bool(resultat)
+
+

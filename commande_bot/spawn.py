@@ -10,7 +10,7 @@ from database.zones import (
 )
 
 from database.player_pokemon import (
-    get_pokemon
+    get_pokemon, possede_pokemon_sql
 )
 
 
@@ -114,6 +114,18 @@ def charger_commandes_spawn(bot):
             pokemon_id
         )
 
+        # Vérifie si le joueur a déjà capturé ce Pokémon
+        deja_capture = possede_pokemon_sql(
+            user_id,
+            pokemon_id
+        )
+
+        # Détermine le statut du Pokémon dans son Pokédex
+        if deja_capture:
+            statut_pokemon = "\n\n✅ **Déjà capturé !**"
+        else:
+            statut_pokemon = "\n\n❗ **Pas encore capturé !**"
+
         # Crée les boutons du Pokémon
         view = PokemonView(
             pokemon,
@@ -127,6 +139,7 @@ def charger_commandes_spawn(bot):
             description=(
                 f"#{pokemon['id']} "
                 f"{pokemon['name']}"
+                f"{statut_pokemon}"
             )
         )
 
