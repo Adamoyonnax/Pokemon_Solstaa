@@ -69,34 +69,38 @@ def charger_commandes_player(bot):
     # /profil
     # ==========================================
 
+    
     @bot.tree.command(
         name="profil",
         description="Afficher ton profil joueur"
     )
-    async def profil(
-        interaction: discord.Interaction
-    ):
+    async def profil(interaction: discord.Interaction):
 
-        # Récupère les informations du joueur
-        player = get_player(
-            interaction.user
-        )
+        print("\n========== DEBUG PROFIL ==========")
+        print(f"ID interaction : {interaction.id}")
+        print(f"Réponse déjà effectuée : {interaction.response.is_done()}")
+        print(f"Commande : {interaction.command.name}")
 
-        # Vérifie que le joueur existe
+        if interaction.response.is_done():
+            print("ATTENTION : interaction déjà acquittée !")
+        else:
+            print("Interaction disponible.")
+            await interaction.response.defer(ephemeral=True)
+
+        print("==================================")
+
+
+        player = get_player(interaction.user)
+
         if not player:
-            await interaction.response.send_message(
-                "❌ Tu n'as pas encore de personnage. "
-                "Utilise /commencer",
+            await interaction.followup.send(
+                "❌ Tu n'as pas encore de personnage. Utilise /commencer",
                 ephemeral=True
             )
             return
 
-        # Récupère son inventaire
-        inventory = get_inventory(
-            interaction.user.id
-        )
+        inventory = get_inventory(interaction.user.id)
 
-        # Crée l'affichage du profil
         embed = discord.Embed(
             title="🎮 Profil Joueur",
             color=discord.Color.blue()
@@ -116,7 +120,7 @@ def charger_commandes_player(bot):
 
         embed.add_field(
             name="💰 Money",
-            value=player["money"],
+            value=str(player["money"]),
             inline=False
         )
 
@@ -130,9 +134,7 @@ def charger_commandes_player(bot):
             inline=False
         )
 
-        await interaction.response.send_message(
-            embed=embed
-        )
+        await interaction.followup.send(embed=embed)
 
 
     # ==========================================

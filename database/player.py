@@ -34,19 +34,17 @@ def get_player(user):
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute(
-        """
-        SELECT discord_id, username, personnage, money
+    cursor.execute("""
+        SELECT *
         FROM players
         WHERE discord_id = ?
-        """,
-        (user.id,)
-    )
+    """, (user.id,))
 
-    row = cursor.fetchone()
+    joueur = cursor.fetchone()
+
     conn.close()
 
-    return row
+    return joueur
 
 
 # Récupère l'inventaire d'un joueur
