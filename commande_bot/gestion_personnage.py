@@ -10,8 +10,9 @@ from database.player import (
     modifier_nom_personnage
 )
 
-from database.player_pokemon import (
-    lister_pokemons_sql
+from database.joueur_pokemon import (
+    lister_pokemons_sql,
+    compter_pokemons_uniques
 )
 
 from vue.boutonListe import PokemonListeView
@@ -177,14 +178,10 @@ def charger_commandes_player(bot):
         name="pokedex",
         description="Afficher tes Pokémon"
     )
-    async def pokedex(
-        interaction: discord.Interaction
-    ):
+    async def pokedex(interaction: discord.Interaction):
 
         # Récupère les Pokémon du joueur
-        pokemons = lister_pokemons_sql(
-            interaction.user.id
-        )
+        pokemons = lister_pokemons_sql(interaction.user.id)
 
         # Vérifie si le joueur possède des Pokémon
         if not pokemons:
@@ -192,19 +189,29 @@ def charger_commandes_player(bot):
                 "Tu n'as aucun Pokémon."
             )
             return
-
+    
+        # Compte les Pokémon uniques
+        nombre_pokemons = compter_pokemons_uniques(
+            interaction.user.id
+        )
+    
+        # Nombre total de Pokémon dans le Pokédex
+        nombre_total = 1025
+    
         # Crée la liste avec 10 Pokémon par page
         view = PokemonListeView(
             pokemons,
-            par_page=10
+            par_page=10,
+            nombre_pokemons=nombre_pokemons,
+            nombre_total=nombre_total
         )
-
+    
         # Affiche la première page
         await interaction.response.send_message(
             embed=view.creer_embed(),
             view=view
         )
-
+    
         # Récupère le message pour les boutons
         view.message = await interaction.original_response()
 

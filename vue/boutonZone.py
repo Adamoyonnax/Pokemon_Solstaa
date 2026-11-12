@@ -1,7 +1,7 @@
 import discord
 import random
 
-from database.player_pokemon import ajouter_pokemon_sql, utiliser_pokeball
+from database.joueur_pokemon import ajouter_pokemon_sql, utiliser_pokeball
 
 
 class PokemonView(discord.ui.View):

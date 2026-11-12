@@ -1,7 +1,7 @@
 import discord
 from discord import app_commands
 
-from database.player_pokemon import (
+from database.joueur_pokemon import (
     ajouter_pokemon_sql,
     supprimer_pokemon_sql
 )

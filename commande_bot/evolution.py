@@ -1,6 +1,6 @@
 import discord
 
-from database.player_pokemon import (
+from database.joueur_pokemon import (
     get_connection,
     lister_pokemons_sql
 )

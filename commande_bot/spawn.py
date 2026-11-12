@@ -9,7 +9,7 @@ from database.zones import (
     get_pokemons_zone
 )
 
-from database.player_pokemon import (
+from database.joueur_pokemon import (
     get_pokemon, possede_pokemon_sql
 )
 
