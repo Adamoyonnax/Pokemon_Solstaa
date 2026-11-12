@@ -13,9 +13,6 @@ from database.player import (
 from database.joueur_pokemon import (
     lister_pokemons_sql,
     compter_pokemons_uniques
-from database.player_pokemon import (
-    lister_pokemons_sql,
-    compter_pokemons_uniques
 )
 
 from vue.boutonListe import PokemonListeView
@@ -23,6 +20,10 @@ from vue.boutonListe import PokemonListeView
 
 # Charge les commandes liées aux joueurs
 def charger_commandes_player(bot):
+
+    # ==========================================
+    # /commencer
+    # ==========================================
 
     @bot.tree.command(
         name="commencer",
@@ -33,6 +34,26 @@ def charger_commandes_player(bot):
         nom: str
     ):
 
+        # Vérifie si le joueur possède déjà un personnage
+        joueur = get_player(interaction.user)
+
+        if joueur:
+            await interaction.response.send_message(
+                "❌ Tu possèdes déjà un personnage.",
+                ephemeral=True
+            )
+            return
+
+        # Vérifie le nom
+        nom = nom.strip()
+
+        if len(nom) < 2 or len(nom) > 30:
+            await interaction.response.send_message(
+                "❌ Le nom doit contenir entre 2 et 30 caractères.",
+                ephemeral=True
+            )
+            return
+
         # Crée le joueur dans la base de données
         create_player(
             interaction.user,
@@ -40,9 +61,13 @@ def charger_commandes_player(bot):
         )
 
         await interaction.response.send_message(
-            f"Profil créé pour {nom}"
+            f"✅ Profil créé pour **{nom}** !"
         )
 
+
+    # ==========================================
+    # /profil
+    # ==========================================
 
     @bot.tree.command(
         name="profil",
@@ -61,7 +86,8 @@ def charger_commandes_player(bot):
         if not player:
             await interaction.response.send_message(
                 "❌ Tu n'as pas encore de personnage. "
-                "Utilise /commencer"
+                "Utilise /commencer",
+                ephemeral=True
             )
             return
 
@@ -72,7 +98,8 @@ def charger_commandes_player(bot):
 
         # Crée l'affichage du profil
         embed = discord.Embed(
-            title="🎮 Profil Joueur"
+            title="🎮 Profil Joueur",
+            color=discord.Color.blue()
         )
 
         embed.add_field(
@@ -107,6 +134,10 @@ def charger_commandes_player(bot):
             embed=embed
         )
 
+
+    # ==========================================
+    # /acheter_ball
+    # ==========================================
 
     @bot.tree.command(
         name="acheter_ball",
@@ -149,7 +180,8 @@ def charger_commandes_player(bot):
         # Vérifie que le joueur possède un profil
         if not get_player(interaction.user):
             await interaction.response.send_message(
-                "❌ Tu dois d'abord créer un personnage avec /commencer.",
+                "❌ Tu dois d'abord créer un personnage "
+                "avec /commencer.",
                 ephemeral=True
             )
             return
@@ -177,67 +209,74 @@ def charger_commandes_player(bot):
         )
 
 
+    # ==========================================
+    # /pokedex
+    # ==========================================
+
     @bot.tree.command(
         name="pokedex",
         description="Afficher tes Pokémon"
     )
-    async def pokedex(interaction: discord.Interaction):
-    async def pokedex(interaction: discord.Interaction):
+    async def pokedex(
+        interaction: discord.Interaction
+    ):
+
+        # Vérifie que le joueur possède un profil
+        if not get_player(interaction.user):
+            await interaction.response.send_message(
+                "❌ Tu dois d'abord créer un personnage "
+                "avec /commencer.",
+                ephemeral=True
+            )
+            return
 
         # Récupère les Pokémon du joueur
-        pokemons = lister_pokemons_sql(interaction.user.id)
-        pokemons = lister_pokemons_sql(interaction.user.id)
+        pokemons = lister_pokemons_sql(
+            interaction.user.id
+        )
 
         # Vérifie si le joueur possède des Pokémon
         if not pokemons:
             await interaction.response.send_message(
-                "Tu n'as aucun Pokémon."
+                "Tu n'as aucun Pokémon.",
+                ephemeral=True
             )
             return
-    
+
         # Compte les Pokémon uniques
         nombre_pokemons = compter_pokemons_uniques(
             interaction.user.id
         )
-    
+
         # Nombre total de Pokémon dans le Pokédex
         nombre_total = 1025
-    
-    
-        # Compte les Pokémon uniques
-        nombre_pokemons = compter_pokemons_uniques(
-            interaction.user.id
-        )
-    
-        # Nombre total de Pokémon dans le Pokédex
-        nombre_total = 1025
-    
+
         # Crée la liste avec 10 Pokémon par page
         view = PokemonListeView(
             pokemons,
             par_page=10,
             nombre_pokemons=nombre_pokemons,
             nombre_total=nombre_total
-            par_page=10,
-            nombre_pokemons=nombre_pokemons,
-            nombre_total=nombre_total
         )
-    
-    
+
         # Affiche la première page
         await interaction.response.send_message(
             embed=view.creer_embed(),
             view=view
         )
-    
-    
+
         # Récupère le message pour les boutons
         view.message = await interaction.original_response()
 
+
+    # ==========================================
+    # /modifier_nom
+    # ==========================================
+
     @bot.tree.command(
-    name="modifier_nom",
-    description="Modifier le nom de ton personnage"
-)
+        name="modifier_nom",
+        description="Modifier le nom de ton personnage"
+    )
     @app_commands.describe(
         nouveau_nom="Le nouveau nom de ton personnage"
     )
@@ -247,7 +286,9 @@ def charger_commandes_player(bot):
     ):
 
         # Vérifie que le joueur existe
-        joueur = get_player(interaction.user.id)
+        joueur = get_player(
+            interaction.user
+        )
 
         if not joueur:
             await interaction.response.send_message(
@@ -280,7 +321,7 @@ def charger_commandes_player(bot):
             return
 
         await interaction.response.send_message(
-            f"✅ Ton personnage porte désormais le nom **{nouveau_nom}** !",
+            f"✅ Ton personnage porte désormais "
+            f"le nom **{nouveau_nom}** !",
             ephemeral=True
         )
-

@@ -170,20 +170,3 @@ def compter_pokemons_uniques(player_id):
     conn.close()
 
     return nombre
-    
-    
-def compter_pokemons_uniques(player_id):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT COUNT(DISTINCT pokemon_id)
-        FROM player_pokemons
-        WHERE player_id = ?
-    """, (player_id,))
-
-    nombre = cursor.fetchone()[0]
-
-    conn.close()
-
-    return nombre
